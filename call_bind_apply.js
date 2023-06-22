@@ -82,3 +82,118 @@
 // }
 // g = f.bind({ name: 'A'}).bind({ name: 'B'})
 // g()//A (There is no such thing as Bind Chaining)
+
+//Q
+//Output?
+// function checkP(success, failure) {
+//     let password = prompt("Password" , "")
+//     if(password === 'password') success()
+//     else failure()
+// }
+
+// let user = {
+//     name: 'A',
+//     loggedSuccess() {
+//         console.log(this.name, " Logged IN");//Logged IN
+//     },
+//     loggedFailure() {
+//         console.log(this.name, " Logged Failure");
+//     }
+// }
+
+// checkP(user.loggedSuccess, user.loggedFailure)// Logged IN, Logged Failure(Dont have access to name)
+// checkP(user.loggedSuccess.bind(user), user.loggedFailure(user))//A  Logged IN, A Logged Failure
+
+//Q
+//Arrow Function Call, Bind, Apply
+// const age = 10;
+// var age2 = 20;
+// var person1 = {
+//     name: 'A',
+//     age: 20,
+//     getAgeArrow: () => console.log(this.age),
+//     getAgeArrow1: () => console.log(this.age2),
+//     getAge() {
+//         console.log(this.age);
+//     }
+// }
+// const person2 = { age: 24}
+// person1.getAgeArrow.call(person2) //undefined (This is because arrow points to outer normal function. As it is not there then it points to window)
+// person1.getAgeArrow1.call(person2) //20 (var is tagged to window like window.age, while const is not)
+// person1.getAge.call(person2) //24 
+
+//POLYFILL CALL
+// let car1 = {
+//     color: 'RED',
+//     car: 'FERRARI'
+// }
+
+// function purchaseCar(currency, price) {
+//     console.log(`I have purchased this ${this.color} ${this.car} for ${price} ${currency}`);
+// }
+
+// Function.prototype.myCall = function (context, ...args) {
+//     if (typeof this !== 'function') {
+//         throw new Error('This is not a Function')
+//     }
+//     context.fn = this
+//     context.fn(...args)
+//     delete context.fn
+// }
+
+// purchaseCar.call(car1, '500000', 'rupees') //I have purchased this RED FERRARI for rupees 500000
+// purchaseCar.myCall(car1, '600000', 'dollars') //I have purchased this RED FERRARI for dollars 600000
+
+//POLYFILL APPLY
+// let car1 = {
+//     color: 'RED',
+//     car: 'FERRARI'
+// }
+
+// function purchaseCar(currency, price) {
+//     console.log(`I have purchased this ${this.color} ${this.car} for ${price} ${currency}`);
+// }
+
+// Function.prototype.myApply = function (context, args = []) {
+//     if (typeof this !== 'function') {
+//         throw new Error('This is not a Function')
+//     }
+
+//     if(!Array.isArray(args)) {
+//         throw new Error('CreateListFromArrayLike called on non-object')
+//     }
+
+//     context.fn = this
+//     context.fn(...args)
+//     delete context.fn
+// }
+
+// purchaseCar.apply(car1, ['500000', 'rupees']) //I have purchased this RED FERRARI for rupees 500000
+// purchaseCar.myApply(car1, ['600000', 'dollars']) //I have purchased this RED FERRARI for dollars 600000
+// purchaseCar.myApply(car1, '600000', 'dollars') //Uncaught Error: CreateListFromArrayLike called on non-object
+
+//POLYFILL BIND
+// let car1 = {
+//     color: 'RED',
+//     car: 'FERRARI'
+// }
+
+// function purchaseCar(currency, price) {
+//     console.log(`I have purchased this ${this.color} ${this.car} for ${price} ${currency}`);
+// }
+
+// Function.prototype.myBind = function (context, ...args) {
+//     if (typeof this !== 'function') {
+//         throw new Error('Cannot be bound as This is not a Function')
+//     }
+//     context.fn = this
+//     return function (...newArgs) {
+//         context.fn(...args, ...newArgs)
+//         delete context.fn
+//     }
+// }
+
+// purchaseCar.bind(car1, '500000', 'rupees')() //I have purchased this RED FERRARI for rupees 500000
+// purchaseCar.myBind(car1, '600000', 'dollars')() //I have purchased this RED FERRARI for dollars 600000
+// const example = purchaseCar.myBind(car1, '700000')
+// example('euros')//I have purchased this RED FERRARI for euros 700000
